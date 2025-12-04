@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'], // Inter jadi default pengganti sans standar
+      },
       colors: {
         // Palet Hijau Success yang kita tentukan
         primary: {

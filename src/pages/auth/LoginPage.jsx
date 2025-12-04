@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import api from '../services/api';
+import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 
 export default function LoginPage() {
@@ -11,49 +11,43 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    try {
-      // 1. Ambil CSRF
-      await api.get('/sanctum/csrf-cookie');
-      
-      // 2. Login
-      await api.post('/login', { email, password });
 
-      // 3. AMBIL DATA USER (WAJIB ADA)
-      // Kita panggil route '/api/user' yang ada di api.php
-      const userResponse = await api.get('/api/user');
-      
-      // 4. Simpan ke LocalStorage
-      // Laravel Resource membungkus data dalam object { data: ... }
-      // Jadi kita ambil userResponse.data.data
-      const userData = userResponse.data.data; 
-      
-      console.log('User Data:', userData); // Cek console, pastikan tidak kosong
-      
+    try {
+      // HAPUS BARIS INI: await api.get('/sanctum/csrf-cookie'); 
+      // Kita langsung tembak login saja.
+
+      const response = await api.post('/login', { email, password });
+
+      // Ambil & Simpan Token
+      const token = response.data.access_token;
+      const userData = response.data.user;
+
+      localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
 
-      // 5. Redirect
+      // Redirect
       navigate('/dashboard'); 
+      // atau window.location.href = '/dashboard'; (biar state bersih total)
 
     } catch (error) {
       console.error(error);
-      alert('Login Gagal');
+      alert('Login Gagal: ' + (error.response?.data?.message || 'Server Error'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center bg-gray-50 overflow-hidden">
+    <div className="relative flex items-center justify-center w-full min-h-screen overflow-hidden bg-gray-50">
       
       {/* --- ANIMATED BACKGROUND (Fresh Blobs) --- */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+      <div className="absolute top-0 left-0 z-0 w-full h-full overflow-hidden">
         {/* Blob Hijau Utama */}
         <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-primary-300 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
         {/* Blob Biru Muda (Untuk variasi segar) */}
         <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-sky-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
         {/* Blob Kuning/Lime (Aksen cerah) */}
-        <div className="absolute -bottom-32 left-20 w-96 h-96 bg-lime-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+        <div className="absolute rounded-full -bottom-32 left-20 w-96 h-96 bg-lime-200 mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
       {/* --- GLASS CARD (Light Mode) --- */}
@@ -63,11 +57,11 @@ export default function LoginPage() {
         
         <div className="relative z-20">
             {/* Header */}
-            <div className="text-center mb-8">
-                <div className="mx-auto h-12 w-12 bg-primary-100 rounded-full flex items-center justify-center mb-4 text-2xl">
+            <div className="mb-8 text-center">
+                <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 text-2xl rounded-full bg-primary-100">
                     🎓
                 </div>
-                <h1 className="text-3xl font-bold text-gray-800 tracking-tight mb-2">Welcome Back!</h1>
+                <h1 className="mb-2 text-3xl font-bold tracking-tight text-gray-800">Welcome Back!</h1>
                 <p className="text-gray-500">Masuk untuk mengelola karirmu</p>
             </div>
 
@@ -76,12 +70,12 @@ export default function LoginPage() {
                 
                 {/* Email Input */}
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1 ml-1">Email Address</label>
+                    <label className="block mb-1 ml-1 text-sm font-semibold text-gray-700">Email Address</label>
                     <input 
                         type="email" 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 shadow-sm"
+                        className="block w-full px-4 py-3 text-gray-900 placeholder-gray-400 transition-all duration-200 bg-white border border-gray-200 shadow-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                         placeholder="nama@alumni.com"
                         required
                     />
@@ -89,12 +83,12 @@ export default function LoginPage() {
 
                 {/* Password Input */}
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1 ml-1">Password</label>
+                    <label className="block mb-1 ml-1 text-sm font-semibold text-gray-700">Password</label>
                     <input 
                         type="password" 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="block w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 shadow-sm"
+                        className="block w-full px-4 py-3 text-gray-900 placeholder-gray-400 transition-all duration-200 bg-white border border-gray-200 shadow-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                         placeholder="••••••••"
                         required
                     />
@@ -112,7 +106,7 @@ export default function LoginPage() {
 
             <div className="mt-6 text-center">
                 <p className="text-sm text-gray-500">
-                    Lupa password? <a href="#" className="text-primary-600 hover:text-primary-700 font-semibold hover:underline">Reset di sini</a>
+                    Lupa password? <a href="#" className="font-semibold text-primary-600 hover:text-primary-700 hover:underline">Reset di sini</a>
                 </p>
             </div>
         </div>
