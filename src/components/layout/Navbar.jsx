@@ -64,6 +64,18 @@ export default function Navbar({ toggleSidebar }) {
       }
   };
 
+  const getGreeting = (name = "") => {
+    const hour = new Date().getHours();
+    let greeting = "";
+
+    if (hour < 12) greeting = "Selamat Pagi";
+    else if (hour < 15) greeting = "Selamat Siang";
+    else if (hour < 18) greeting = "Selamat Sore";
+    else greeting = "Selamat Malam";
+
+    return `${greeting}${name ? `, ${name}` : ""}`;
+  };
+
   return (
   <>
     <header 
@@ -82,10 +94,10 @@ export default function Navbar({ toggleSidebar }) {
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
         </button>
         
-        {/* Breadcrumb / Title simpel */}
+        {/* Breadcrumb / Title dinamis */}
         <div className="hidden sm:block">
-           <h2 className="text-xl font-bold text-gray-800">Dashboard</h2>
-           <p className="text-xs text-gray-400">Selamat datang kembali!</p>
+            <h2 className="text-xl font-bold text-gray-800">{getGreeting()}</h2>
+            <p className="text-xs text-gray-400">Selamat datang kembali!</p>
         </div>
       </div>
 

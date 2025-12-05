@@ -23,7 +23,7 @@ export default function EmploymentPage() {
 
   const fetchEmployments = async () => {
     try {
-      const response = await api.get('/api/v1/alumni/employments');
+      const response = await api.get('/v1/alumni/employments');
       setEmployments(response.data);
     } catch (error) {
       console.error('Gagal ambil data', error);
@@ -76,10 +76,10 @@ export default function EmploymentPage() {
     setIsSubmitting(true);
     try {
       if (editId) {
-        await api.put(`/api/v1/alumni/employments/${editId}`, formData);
+        await api.put(`/v1/alumni/employments/${editId}`, formData);
         alert('Data berhasil diperbarui!');
       } else {
-        await api.post('/api/v1/alumni/employments', formData);
+        await api.post('/v1/alumni/employments', formData);
         alert('Data berhasil disimpan!');
       }
       await fetchEmployments();
@@ -95,7 +95,7 @@ export default function EmploymentPage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Yakin ingin menghapus data ini?')) return;
     try {
-      await api.delete(`/api/v1/alumni/employments/${id}`);
+      await api.delete(`/v1/alumni/employments/${id}`);
       setEmployments(employments.filter(item => item.id !== id));
     } catch (error) {
       alert('Gagal menghapus data');

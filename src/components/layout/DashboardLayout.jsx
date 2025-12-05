@@ -1,10 +1,29 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
+import useIdleTimer from '../../hooks/useIdleTimer';
 
 export default function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // --- LOGIKA AUTO LOGOUT ---
+  const handleAutoLogout = () => {
+    console.log("User tidak aktif. Auto logout...");
+    
+    // 1. Hapus Data
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
+    // 2. Redirect ke Login DENGAN PESAN (State)
+    // Kita kirim state 'sessionExpired: true' agar Login page tahu
+    navigate('/login', { state: { sessionExpired: true } });
+  };
+
+  // Aktifkan Timer (30 Menit = 1800000 ms)
+  // Ganti 5000 (5 detik) kalau mau ngetes dulu
+  useIdleTimer(handleAutoLogout, 1800000); 
+  // --------------------------
 
   // Definisi Menu
   const alumniMenus = [

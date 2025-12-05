@@ -21,7 +21,7 @@ export default function InternshipPage() {
 
   const fetchInternships = async () => {
     try {
-      const response = await api.get('/api/v1/alumni/internships');
+      const response = await api.get('/v1/alumni/internships');
       setInternships(response.data);
     } catch (error) {
       console.error('Gagal ambil data', error);
@@ -70,10 +70,10 @@ export default function InternshipPage() {
     setIsSubmitting(true);
     try {
       if (editId) {
-        await api.put(`/api/v1/alumni/internships/${editId}`, formData);
+        await api.put(`/v1/alumni/internships/${editId}`, formData);
         alert('Data berhasil diperbarui!');
       } else {
-        await api.post('/api/v1/alumni/internships', formData);
+        await api.post('/v1/alumni/internships', formData);
         alert('Data berhasil disimpan!');
       }
       await fetchInternships();
@@ -89,7 +89,7 @@ export default function InternshipPage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Yakin ingin menghapus data ini?')) return;
     try {
-      await api.delete(`/api/v1/alumni/internships/${id}`);
+      await api.delete(`/v1/alumni/internships/${id}`);
       setInternships(internships.filter(item => item.id !== id));
     } catch (error) {
       alert('Gagal menghapus data');

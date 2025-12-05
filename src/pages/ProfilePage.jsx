@@ -38,7 +38,7 @@ export default function ProfilePage() {
 
   const fetchProfile = async () => {
     try {
-      const response = await api.get('/api/v1/alumni/profile');
+      const response = await api.get('/v1/alumni/profile');
       const data = response.data.data;
       
       setUserDisplay(data);
@@ -128,7 +128,7 @@ export default function ProfilePage() {
 
     setIsUploading(true);
     try {
-      const res = await api.post('/api/v1/alumni/profile', uploadData, {
+      const res = await api.post('/v1/alumni/profile', uploadData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
@@ -164,7 +164,7 @@ export default function ProfilePage() {
         delete payload.new_password_confirmation;
       }
 
-      const res = await api.put('/api/v1/alumni/profile', payload);
+      const res = await api.put('/v1/alumni/profile', payload);
       
       alert('Profil berhasil disimpan!');
       
