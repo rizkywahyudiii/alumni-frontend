@@ -14,8 +14,6 @@ import DashboardLayout from './components/layout/DashboardLayout';
 import ProtectedRoute from './components/ProtectedRoute'; 
 import RoleRoute from './components/RoleRoute';
 
-// ... Import halaman Alumni/Jobs lainnya (sama seperti sebelumnya) ...
-// (Saya singkat agar tidak kepanjangan, pastikan import employment, tracer study dll tetap ada)
 import EmploymentPage from './pages/alumni/EmploymentPage';
 import InternshipPage from './pages/alumni/InternshipPage';
 import TracerStudy from './pages/alumni/TracerStudy';
@@ -24,6 +22,7 @@ import AlumniDetailPage from './pages/alumni/AlumniDetailPage';
 import JobsPage from './pages/jobs/JobsPage';
 import CreateJobPage from './pages/jobs/CreateJobPage';
 import JobDetailPage from './pages/jobs/JobDetailPage';
+import AdminUserPage from './pages/admin/AdminUserPage';
 
 function App() {
   return (
@@ -57,6 +56,12 @@ function App() {
             {/* 3. Routes Khusus Posting Job (Alumni & Admin) */}
             <Route element={<RoleRoute allowedRoles={['alumni', 'admin', 'super_admin']} />}>
                 <Route path="/jobs/create" element={<CreateJobPage />} />
+            </Route>
+
+            {/* 4. Area Admin / Super Admin */}
+            <Route element={<RoleRoute allowedRoles={['admin', 'super_admin']} />}>
+                <Route path="/admin/users" element={<AdminUserPage />} />
+                {/* Nanti bisa tambah halaman admin lain di sini */}
             </Route>
 
           </Route>

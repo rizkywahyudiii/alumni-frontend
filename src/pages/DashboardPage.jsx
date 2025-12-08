@@ -58,7 +58,7 @@ export default function DashboardPage() {
     }, [token, isAlumni]);
 
     // Cek Permission Admin
-    const isAdminOrKaprodi = ['admin', 'kaprodi', 'super_admin'].includes(user.role);
+    const isAdmin = ['admin', 'super_admin'].includes(user.role);
     
 
     return (
@@ -78,7 +78,7 @@ export default function DashboardPage() {
                 <div className="flex flex-col gap-2 mt-4 md:mt-0 md:flex-row md:items-center">
                     
                     {/* TOMBOL EXPORT (HANYA MUNCUL UNTUK ADMIN) */}
-                    {isAdminOrKaprodi && (
+                    {isAdmin && (
                         <div className="mr-2">
                             <ExportButton />
                         </div>
