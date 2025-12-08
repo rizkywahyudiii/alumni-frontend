@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import ExportButton from '../components/common/ExportButton';
 // Import komponen Chart dari Recharts
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
@@ -56,10 +57,14 @@ export default function DashboardPage() {
         if (token) fetchData();
     }, [token, isAlumni]);
 
+    // Cek Permission Admin
+    const isAdminOrKaprodi = ['admin', 'kaprodi', 'super_admin'].includes(user.role);
+    
+
     return (
         <div className="space-y-8 animate-fade-in">
-            {/* Header Sapaan */}
-            <div className="flex flex-col justify-between md:flex-row md:items-center">
+             {/* Header Sapaan */}
+             <div className="flex flex-col justify-between md:flex-row md:items-center">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">Dashboard Statistik</h1>
                     <p className="mt-1 text-gray-500">Selamat datang, {user.name}!</p>
@@ -70,24 +75,34 @@ export default function DashboardPage() {
                     </span>
                 </div>
 
-                {/* --- LOGIC PERINGATAN TRACER STUDY --- */}
-                {/* Hanya muncul jika:
-                    1. Tidak loading
-                    2. User adalah ALUMNI (isAlumni == true)
-                    3. Belum isi tracer study (hasTracerData == false)
-                */}
-                {!loading && isAlumni && !hasTracerData && (
-                    <Link 
-                        to="/tracer-study" 
-                        className="flex items-center gap-2 px-4 py-3 mt-4 text-sm font-bold text-yellow-900 transition-all bg-yellow-400 shadow-lg rounded-xl shadow-yellow-400/20 md:mt-0 hover:bg-yellow-500 hover:-translate-y-1"
-                    >
-                        <span className="relative flex w-3 h-3">
-                            <span className="absolute inline-flex w-full h-full bg-yellow-900 rounded-full opacity-75 animate-ping"></span>
-                            <span className="relative inline-flex w-3 h-3 bg-yellow-900 rounded-full"></span>
-                        </span>
-                        ⚠️ Anda Belum Mengisi Tracer Study!
-                    </Link>
-                )}
+                <div className="flex flex-col gap-2 mt-4 md:mt-0 md:flex-row md:items-center">
+                    
+                    {/* TOMBOL EXPORT (HANYA MUNCUL UNTUK ADMIN) */}
+                    {isAdminOrKaprodi && (
+                        <div className="mr-2">
+                            <ExportButton />
+                        </div>
+                    )}
+
+                    {/* --- LOGIC PERINGATAN TRACER STUDY --- */}
+                    {/* Hanya muncul jika:
+                        1. Tidak loading
+                        2. User adalah ALUMNI (isAlumni == true)
+                        3. Belum isi tracer study (hasTracerData == false)
+                    */}
+                    {!loading && isAlumni && !hasTracerData && (
+                        <Link 
+                            to="/tracer-study" 
+                            className="flex items-center gap-2 px-4 py-3 mt-4 text-sm font-bold text-yellow-900 transition-all bg-yellow-400 shadow-lg rounded-xl shadow-yellow-400/20 md:mt-0 hover:bg-yellow-500 hover:-translate-y-1"
+                        >
+                            <span className="relative flex w-3 h-3">
+                                <span className="absolute inline-flex w-full h-full bg-yellow-900 rounded-full opacity-75 animate-ping"></span>
+                                <span className="relative inline-flex w-3 h-3 bg-yellow-900 rounded-full"></span>
+                            </span>
+                            ⚠️ Anda Belum Mengisi Tracer Study!
+                        </Link>
+                    )}
+                </div>
             </div>
 
             {/* --- STATS CARDS --- */}
