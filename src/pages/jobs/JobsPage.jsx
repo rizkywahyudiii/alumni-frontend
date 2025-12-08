@@ -70,7 +70,7 @@ const JobsPage = () => {
             {/* Header Section */}
             <div className="flex flex-col items-center justify-between mb-6 md:flex-row">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">💼 Lowongan Kerja Alumni</h1>
+                    <h1 className="text-2xl font-bold text-gray-800">💼 Lowongan Kerja</h1>
                     <p className="mt-1 text-gray-500">Temukan peluang karir atau bagikan info loker.</p>
                 </div>
                 <Link to="/jobs/create" className="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm flex items-center gap-2 transition-all">
