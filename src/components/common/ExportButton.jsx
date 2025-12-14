@@ -57,7 +57,7 @@ export default function ExportButton() {
             ) : (
                 <>
                     <FileDown className="w-5 h-5" />
-                    Export Laporan Excel
+                    Data Tracer Study
                 </>
             )}
         </button>
