@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, Briefcase, Mail } from "lucide-react"; // Pastikan install lucide-react atau ganti icon SVG biasa
+import { Search, Briefcase, Mail } from "lucide-react"; 
 import { Link } from 'react-router-dom';
 
 const AlumniDirectoryPage = () => {
@@ -8,31 +8,43 @@ const AlumniDirectoryPage = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     
-    // Debounce search (biar gak request tiap ketik 1 huruf)
-    // Tapi untuk simpel, kita pakai enter atau button cari saja dulu.
-
-    const token = localStorage.getItem('token');
-
+    // Fungsi Fetch Data
     const fetchAlumni = async (query = '') => {
         setLoading(true);
         try {
+            console.log("Fetching with Token:", localStorage.getItem('token')); // Debug Token
+
             const response = await axios.get(`http://localhost:8000/api/v1/alumni/directory?q=${query}`, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { 
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    Accept: 'application/json'
+                }
             });
-            // Laravel pagination membungkus data dalam response.data.data.data (agak tricky)
-            // Cek struktur response di console log kalau error
-            setAlumniList(response.data.data.data || response.data.data); 
+            
+            // ... (logic data sama)
+            let incomingData = [];
+            if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
+                incomingData = response.data.data.data;
+            } else if (response.data?.data && Array.isArray(response.data.data)) {
+                incomingData = response.data.data;
+            } else if (Array.isArray(response.data)) {
+                incomingData = response.data;
+            }
+            setAlumniList(incomingData);
+
         } catch (error) {
-            console.error(error);
+            console.error("Error fetching:", error);
         } finally {
             setLoading(false);
         }
     };
 
+    // Initial Load
     useEffect(() => {
         fetchAlumni();
     }, []);
 
+    // Handle Search Submit
     const handleSearch = (e) => {
         e.preventDefault();
         fetchAlumni(searchTerm);
@@ -41,16 +53,17 @@ const AlumniDirectoryPage = () => {
     // Helper Avatar
     const getAvatarUrl = (path) => {
         if (!path) return `https://ui-avatars.com/api/?background=random&name=Alumni`;
+        // Pastikan URL backend sesuai environment
         return path.startsWith('http') ? path : `http://localhost:8000/storage/${path}`;
     };
 
     return (
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto animate-fade-in">
             {/* Header & Search */}
             <div className="flex flex-col items-end justify-between gap-4 mb-8 md:flex-row">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">👥 Direktori Alumni</h1>
-                    <p className="mt-1 text-gray-500">Cari teman seangkatan atau bangun relasi profesional.</p>
+                    <p className="mt-1 text-gray-500">Cari teman seprodi atau bangun relasi profesional.</p>
                 </div>
                 
                 <form onSubmit={handleSearch} className="relative w-full md:w-1/3">
@@ -59,7 +72,7 @@ const AlumniDirectoryPage = () => {
                         placeholder="Cari nama alumni..." 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full py-2 pl-10 pr-4 transition-all border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
                 </form>
@@ -67,14 +80,17 @@ const AlumniDirectoryPage = () => {
 
             {/* Grid Alumni */}
             {loading ? (
-                <div className="py-10 text-center">Memuat data...</div>
+                <div className="py-20 text-center">
+                    <div className="w-10 h-10 mx-auto mb-4 border-4 border-blue-200 rounded-full animate-spin border-t-blue-600"></div>
+                    <p className="text-gray-500">Memuat data...</p>
+                </div>
             ) : (
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {alumniList.length > 0 ? (
                         alumniList.map((alumni) => (
-                            <div key={alumni.id} className="flex items-start gap-4 p-6 transition-shadow bg-white border border-gray-100 shadow-sm rounded-xl hover:shadow-md">
+                            <div key={alumni.id} className="flex items-start gap-4 p-6 transition-all bg-white border border-gray-100 shadow-sm rounded-xl hover:shadow-md hover:-translate-y-1">
                                 
-                                {/* Avatar (Sekarang jadi Link) */}
+                                {/* Avatar */}
                                 <Link to={`/directory/${alumni.id}`} className="flex-shrink-0">
                                     <img 
                                         src={getAvatarUrl(alumni.avatar)} 
@@ -84,20 +100,22 @@ const AlumniDirectoryPage = () => {
                                 </Link>
                                 
                                 <div className="flex-1 min-w-0">
-                                    {/* Nama (Sekarang jadi Link) */}
+                                    {/* Nama */}
                                     <h3 className="text-lg font-bold text-gray-900 truncate">
                                         <Link to={`/directory/${alumni.id}`} className="transition-colors hover:text-blue-600">
                                             {alumni.name}
                                         </Link>
-                                    </h3>                                    
+                                    </h3>
+                                    
+                                    {/* ✅ Perbaikan Akses Angkatan (Langsung dari object alumni) */}
                                     <div className="mb-1 text-sm text-gray-500">
-                                        Angkatan {alumni.tahun_lulus || '-'}
+                                        Angkatan {alumni.angkatan || '-'}
                                     </div>
 
-                                    {/* Data Pekerjaan (Dari Tracer Study) */}
+                                    {/* Data Pekerjaan (Tracer Study) */}
                                     {alumni.tracer_study ? (
                                         <div className="flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded w-fit mt-2">
-                                            <Briefcase size={12} />
+                                            <Briefcase size={12} className="shrink-0" />
                                             <span className="truncate max-w-[150px]">
                                                 {alumni.tracer_study.jabatan} di {alumni.tracer_study.nama_instansi}
                                             </span>
@@ -106,7 +124,7 @@ const AlumniDirectoryPage = () => {
                                         <div className="mt-2 text-xs italic text-gray-400">Belum update karir</div>
                                     )}
 
-                                    {/* Tombol Kontak (Cek Privacy settings allow_contact) */}
+                                    {/* Tombol Kontak */}
                                     {alumni.alumni_profile?.privacy_settings?.allow_contact && (
                                         <a 
                                             href={`mailto:${alumni.email}`} 

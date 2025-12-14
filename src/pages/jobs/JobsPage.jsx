@@ -15,6 +15,10 @@ const JobsPage = () => {
     // Data User Login
     const token = localStorage.getItem('token');
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+    // ✅ LOGIC PERMISSION: Siapa yang boleh posting?
+    // Mahasiswa & Dosen TIDAK ADA di list ini, jadi tombol akan hilang buat mereka
+    const canCreateJob = ['alumni', 'admin', 'super_admin'].includes(currentUser.role);
     
     // Config Axios
     const axiosConfig = {
@@ -66,16 +70,20 @@ const JobsPage = () => {
     };
 
     return (
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto animate-fade-in">
             {/* Header Section */}
             <div className="flex flex-col items-center justify-between mb-6 md:flex-row">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">💼 Lowongan Kerja</h1>
-                    <p className="mt-1 text-gray-500">Temukan peluang karir atau bagikan info loker.</p>
+                    <p className="mt-1 text-gray-500">Temukan peluang karir Anda disini.</p>
                 </div>
-                <Link to="/jobs/create" className="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm flex items-center gap-2 transition-all">
-                    <span>+</span> Pasang Lowongan
-                </Link>
+                
+                {/* ✅ CONDITION: Tombol hanya muncul jika punya hak akses */}
+                {canCreateJob && (
+                    <Link to="/jobs/create" className="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm flex items-center gap-2 transition-all hover:-translate-y-0.5">
+                        <span>+</span> Pasang Lowongan
+                    </Link>
+                )}
             </div>
 
             {/* --- SEARCH & FILTER BAR --- */}
@@ -112,40 +120,45 @@ const JobsPage = () => {
                         </select>
                     </div>
 
-                    {/* Filter "Hanya Punya Saya" */}
-                    <div className="flex items-center space-x-2 md:col-span-4">
-                        <input 
-                            type="checkbox" 
-                            id="myJobs"
-                            checked={onlyMyJobs}
-                            onChange={(e) => setOnlyMyJobs(e.target.checked)}
-                            className="w-5 h-5 text-blue-600 border-gray-300 rounded cursor-pointer focus:ring-blue-500"
-                        />
-                        <label htmlFor="myJobs" className="font-medium text-gray-700 cursor-pointer select-none">
-                            Hanya Postingan Saya
-                        </label>
-                    </div>
+                    {/* ✅ CONDITION: Filter "Punya Saya" juga disembunyikan buat Mahasiswa */}
+                    {canCreateJob && (
+                        <div className="flex items-center space-x-2 md:col-span-4">
+                            <input 
+                                type="checkbox" 
+                                id="myJobs"
+                                checked={onlyMyJobs}
+                                onChange={(e) => setOnlyMyJobs(e.target.checked)}
+                                className="w-5 h-5 text-blue-600 border-gray-300 rounded cursor-pointer focus:ring-blue-500"
+                            />
+                            <label htmlFor="myJobs" className="font-medium text-gray-700 cursor-pointer select-none">
+                                Hanya Postingan Saya
+                            </label>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Loading State */}
-            {loading && <div className="py-10 text-center text-gray-500">Memuat lowongan...</div>}
+            {loading && (
+                <div className="flex justify-center py-20">
+                    <div className="w-10 h-10 border-4 border-blue-200 rounded-full animate-spin border-t-blue-600"></div>
+                </div>
+            )}
 
-            {/* Empty State (Jika filter tidak menemukan hasil) */}
+            {/* Empty State */}
             {!loading && filteredJobs.length === 0 && (
                 <div className="py-16 text-center bg-white border border-gray-300 border-dashed rounded-xl">
                     <svg className="w-12 h-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <h3 className="mt-2 text-sm font-medium text-gray-900">Tidak ditemukan</h3>
-                    <p className="mt-1 text-sm text-gray-500">Coba ubah kata kunci pencarian atau filter Anda.</p>
+                    <p className="mt-1 text-sm text-gray-500">Belum ada lowongan yang sesuai dengan kriteria Anda.</p>
                 </div>
             )}
 
             {/* Job Grid */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredJobs.map((job) => {
-                    // Cek apakah ini punya user yang login
                     const isMyJob = job.user_id === currentUser.id;
 
                     return (
@@ -161,13 +174,12 @@ const JobsPage = () => {
                                     <p className="text-sm font-medium text-gray-600">{job.company}</p>
                                 </div>
                                 
-                                {/* BADGE TIPE JOB */}
                                 <span className="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 border border-gray-200 rounded">
                                     {job.job_type}
                                 </span>
                             </div>
 
-                            {/* --- BADGE PUNYA SAYA --- */}
+                            {/* Badge Punya Saya hanya muncul jika itu memang punya dia */}
                             {isMyJob && (
                                 <div className="mb-3">
                                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
@@ -193,7 +205,7 @@ const JobsPage = () => {
                             <p className="flex-grow mb-6 text-sm text-gray-500 line-clamp-3">{job.description}</p>
 
                             <div className="flex items-center justify-between pt-4 mt-auto text-xs text-gray-400 border-t border-gray-100">
-                                <span>{isMyJob ? 'Oleh: Anda' : `Oleh: ${job.user?.name}`}</span>
+                                <span>{isMyJob ? 'Oleh: Anda' : `Oleh: ${job.user?.name || 'Alumni'}`}</span>
                                 <span>{formatDate(job.created_at)}</span>
                             </div>
                             

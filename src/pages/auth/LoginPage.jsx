@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom'; // Import Link
 import Toast from '../../components/common/Toast';
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react"; // Pakai icon loader biar rapi
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -14,7 +14,7 @@ export default function LoginPage() {
   
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
 
-  // Cek apakah ada pesan "Session Expired" saat halaman dimuat
+  // Cek Session Expired
   useEffect(() => {
     if (location.state?.sessionExpired) {
         setToast({
@@ -22,70 +22,56 @@ export default function LoginPage() {
             message: 'Sesi Anda telah habis. Mohon login ulang.',
             type: 'error'
         });
-        
-        // Bersihkan state history agar kalau di-refresh alert gak muncul lagi
         window.history.replaceState({}, document.title);
     }
   }, [location]);
 
+  // Handle Login
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    // Tutup toast sebelumnya jika ada
     setToast({ ...toast, show: false });
 
     try {
-      // PERBAIKAN: Gunakan '/login' saja.
-      // Karena baseURL di api.js sudah 'http://localhost:8000/api', 
-      // maka request ini akan menjadi 'http://localhost:8000/api/login'.
+      // POST Login
       const response = await api.post('/login', { email, password });
 
-      // Pastikan struktur response sesuai dengan backend Laravel Anda
-      // Biasanya: response.data.token atau response.data.access_token
-      const token = response.data.access_token || response.data.token;
+      const token = response.data.access_token; 
       const userData = response.data.user;
 
-      if (!token) {
-        throw new Error('Token tidak ditemukan dalam respon server.');
-      }
-
+      // Simpan Auth Data
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
 
-      navigate('/dashboard'); 
+      // Redirect Logic
+      if (userData.email_verified_at === null) {
+          navigate('/register-success', { state: { email: userData.email } });
+      } else {
+          navigate('/dashboard');
+      }
 
     } catch (error) {
       console.error("Login Error:", error);
       
       let errorMessage = 'Login Gagal. Periksa email/password.';
-      
-      // Menangani pesan error dari backend
       if (error.response) {
-        // Backend memberikan respon error (misal 401 atau 422)
         errorMessage = error.response.data.message || errorMessage;
       } else if (error.request) {
-        // Request terkirim tapi tidak ada respon (misal server mati atau CORS parah)
         errorMessage = 'Tidak dapat terhubung ke server. Cek koneksi Anda.';
       } else {
-        // Error lainnya
         errorMessage = error.message;
       }
 
-      setToast({
-        show: true,
-        message: errorMessage,
-        type: 'error'
-      });
+      setToast({ show: true, message: errorMessage, type: 'error' });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="relative flex items-center justify-center w-full min-h-screen overflow-hidden font-sans bg-gray-50">
+    <div className="relative flex items-center justify-center w-full min-h-screen overflow-hidden font-sans bg-gray-50 animate-fade-in">
       
       {/* --- ANIMATED BACKGROUND --- */}
-      {/* Pastikan tailwind.config.js sudah diupdate agar animasi blob jalan */}
       <div className="absolute top-0 left-0 z-0 w-full h-full overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-300 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
         <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
@@ -106,8 +92,8 @@ export default function LoginPage() {
                 <p className="text-gray-500">Masuk untuk mengelola karirmu</p>
             </div>
 
-            <div className="mb-8 text-center">
-              {/* Pasang Toast disini */}
+            {/* Toast Notification */}
+            <div className="mb-6">
               {toast.show && (
                   <Toast 
                       message={toast.message} 
@@ -146,33 +132,49 @@ export default function LoginPage() {
                 <button 
                     type="submit" 
                     disabled={isLoading}
-                    className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 transform transition-all duration-200 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 transform transition-all duration-200 hover:scale-[1.02] active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-2"
                 >
                     {isLoading ? (
-                        <span className="flex items-center justify-center gap-2">
-                             <svg className="w-5 h-5 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <>
+                             <Loader2 className="animate-spin" size={20} />
                              Memproses...
-                        </span>
+                        </>
                     ) : "Masuk Aplikasi"}
                 </button>
             </form>
 
-            <div className="mt-8 text-center">
-                <p className="text-sm text-gray-500">
-                    Lupa password? <a href="#" className="font-semibold text-emerald-600 hover:text-emerald-700 hover:underline">Reset di sini</a>
-                </p>
-            </div>
-            <div className="mt-8 text-center">
-                <p className="text-sm text-gray-500">
-                    <a 
-                      href="/" 
-                      className="inline-flex items-center gap-1.5 text-sm font-medium 
-                                text-gray-600 hover:text-gray-800 hover:underline"
+            {/* Footer Links */}
+            <div className="mt-8 space-y-4 text-center">
+                {/* Opsi Daftar Baru */}
+                <p className="text-sm text-gray-600">
+                    Belum punya akun?{' '}
+                    <Link 
+                        to="/register" 
+                        className="font-semibold transition-colors text-emerald-600 hover:text-emerald-700 hover:underline"
                     >
-                      <ArrowLeft size={16} className="text-gray-500" />
-                      Kembali
-                    </a>
+                        Daftar sekarang
+                    </Link>
                 </p>
+
+                {/* Forgot Password */}
+                <p className="text-sm text-gray-500">
+                    Lupa password?{' '}
+                    <Link 
+                        to="/forgot-password" 
+                        className="font-semibold text-emerald-600 hover:text-emerald-700 hover:underline"
+                    >
+                        Reset di sini
+                    </Link>
+                </p>
+
+                {/* Back to Home */}
+                <Link 
+                    to="/" 
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-800 hover:underline transition-colors"
+                >
+                    <ArrowLeft size={16} />
+                    Kembali ke Beranda
+                </Link>
             </div>
         </div>
       </div>

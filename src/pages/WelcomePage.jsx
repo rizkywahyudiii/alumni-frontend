@@ -23,12 +23,21 @@ export default function WelcomePage() {
           <span className="text-xl font-bold tracking-tight text-gray-900">AlumniApp</span>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {/* Tombol Masuk (Text only biar clean) */}
           <Link 
             to="/login" 
+            className="px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:text-gray-900"
+          >
+            Masuk
+          </Link>
+
+          {/* Tombol Daftar (Primary Action) */}
+          <Link 
+            to="/register" 
             className="px-6 py-2.5 text-sm font-semibold text-white transition-all duration-300 rounded-full bg-gray-900 hover:bg-gray-800 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
           >
-            Masuk / Daftar
+            Daftar Sekarang
           </Link>
         </div>
       </nav>

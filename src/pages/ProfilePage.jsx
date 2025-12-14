@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import api from '../services/api'; // Pastikan path ini sesuai
+import axios from 'axios'; // Gunakan axios global
 import { Camera, Save, User, Lock, Shield, IdCard } from "lucide-react";
 
 export default function ProfilePage() {
@@ -8,42 +8,30 @@ export default function ProfilePage() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
-  // State User (untuk tampilan statis di sidebar kiri)
+  // State User & Form
   const [userDisplay, setUserDisplay] = useState(null);
-
-  // State Form (untuk input data)
   const [formData, setFormData] = useState({
-    // Data Akun (Table Users)
-    name: '',
-    email: '',
-    current_password: '',
-    new_password: '',
-    new_password_confirmation: '',
-
-    // Data Alumni (Table AlumniProfiles)
-    phone: '',
-    address: '',
-    linkedin_url: '',
-    gender: '',
-    date_of_birth: '',
-    privacy_settings: {
-      show_in_directory: true,
-      allow_contact: false,
-      show_email: false
-    }
+    name: '', email: '', current_password: '', new_password: '', new_password_confirmation: '',
+    phone: '', address: '', linkedin_url: '', gender: '', date_of_birth: '',
+    privacy_settings: { show_in_directory: true, allow_contact: false, show_email: false }
   });
+  const [activeTab, setActiveTab] = useState('biodata');
 
-  // State Tab Aktif (Agar form tidak kepanjangan)
-  const [activeTab, setActiveTab] = useState('biodata'); // biodata | account | privacy
-
+  // --- FETCH PROFILE ---
   const fetchProfile = async () => {
     try {
-      const response = await api.get('/v1/alumni/profile');
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:8000/api/v1/alumni/profile', {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json'
+        }
+      });
       const data = response.data.data;
       
       setUserDisplay(data);
 
-      // Mapping data backend ke state form
+      // Mapping data
       const profile = data.alumni_profile || {};
       const privacy = profile.privacy_settings || {};
 
@@ -61,10 +49,7 @@ export default function ProfilePage() {
           allow_contact: privacy.allow_contact ?? false,
           show_email: privacy.show_email ?? false
         },
-        // Reset password fields
-        current_password: '',
-        new_password: '',
-        new_password_confirmation: ''
+        current_password: '', new_password: '', new_password_confirmation: ''
       }));
 
     } catch (error) {
@@ -78,66 +63,33 @@ export default function ProfilePage() {
     fetchProfile();
   }, []);
 
-  // --- HANDLERS ---
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handlePrivacyChange = (e) => {
-    const { name, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      privacy_settings: {
-        ...prev.privacy_settings,
-        [name]: checked
-      }
-    }));
-  };
-
-  // Helper: Get Avatar URL
-  const getAvatarUrl = (path) => {
-    if (!path) return null;
-    return path.startsWith('http') ? path : `http://localhost:8000/storage/${path}`;
-  };
-
-  // 1. Handle Upload Avatar (Langsung Upload saat pilih file)
+  // --- HANDLER UPLOAD FOTO ---
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { alert('Ukuran file maksimal 2MB!'); return; }
 
-    if (file.size > 2 * 1024 * 1024) {
-      alert('Ukuran file maksimal 2MB!');
-      return;
-    }
-
-    // Gunakan FormData untuk file
     const uploadData = new FormData();
     uploadData.append('avatar', file);
-    
-    // Backend kita butuh data lain agar tidak null? 
-    // Tidak, karena di controller kita pakai $request->hasFile('avatar') terpisah.
-    // Tapi karena method kita PUT, kita butuh trik untuk Laravel menangkap file:
-    // Gunakan POST dengan _method: PUT
     uploadData.append('_method', 'PUT'); 
-    
-    // Kita kirim nama & email juga karena validasi 'required' di controller
     uploadData.append('name', formData.name);
     uploadData.append('email', formData.email);
 
     setIsUploading(true);
     try {
-      const res = await api.post('/v1/alumni/profile', uploadData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const token = localStorage.getItem('token');
+      const res = await axios.post('http://localhost:8000/api/v1/alumni/profile', uploadData, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+          Accept: 'application/json'
+        }
       });
       
       alert('Foto profil berhasil diperbarui!');
-      
-      // Update display user
       setUserDisplay(res.data.data);
       
-      // Update Navbar (LocalStorage)
+      // Update Navbar
       const userData = JSON.parse(localStorage.getItem('user') || '{}');
       localStorage.setItem('user', JSON.stringify({ ...userData, avatar: res.data.data.avatar }));
       window.dispatchEvent(new Event("storage"));
@@ -150,13 +102,12 @@ export default function ProfilePage() {
     }
   };
 
-  // 2. Handle Submit Form Data (Text)
+  // --- HANDLER SUBMIT DATA ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      // Bersihkan password jika kosong (agar tidak kena validasi backend)
       const payload = { ...formData };
       if (!payload.current_password) {
         delete payload.current_password;
@@ -164,30 +115,29 @@ export default function ProfilePage() {
         delete payload.new_password_confirmation;
       }
 
-      const res = await api.put('/v1/alumni/profile', payload);
+      const token = localStorage.getItem('token');
+      const res = await axios.put('http://localhost:8000/api/v1/alumni/profile', payload, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
       
       alert('Profil berhasil disimpan!');
-      
-      // Refresh data display
       setUserDisplay(res.data.data);
       
-      // Update Navbar nama/email jika berubah
       const userData = JSON.parse(localStorage.getItem('user') || '{}');
       localStorage.setItem('user', JSON.stringify({ ...userData, name: res.data.data.name, email: res.data.data.email }));
       window.dispatchEvent(new Event("storage"));
 
-      // Clear password fields
       setFormData(prev => ({
-        ...prev,
-        current_password: '',
-        new_password: '',
-        new_password_confirmation: ''
+        ...prev, current_password: '', new_password: '', new_password_confirmation: ''
       }));
 
     } catch (error) {
       console.error(error);
       const msg = error.response?.data?.message || 'Gagal menyimpan perubahan.';
-      // Jika ada error spesifik (misal password salah)
       if (error.response?.data?.errors) {
          const firstErr = Object.values(error.response.data.errors)[0][0];
          alert(`${msg}: ${firstErr}`);
@@ -197,6 +147,20 @@ export default function ProfilePage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Helper change handler
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  const handlePrivacyChange = (e) => {
+    const { name, checked } = e.target;
+    setFormData(prev => ({ ...prev, privacy_settings: { ...prev.privacy_settings, [name]: checked } }));
+  };
+  const getAvatarUrl = (path) => {
+    if (!path) return null;
+    return path.startsWith('http') ? path : `http://localhost:8000/storage/${path}`;
   };
 
   if (loading) return <div className="p-10 text-center text-gray-500">Memuat profil...</div>;

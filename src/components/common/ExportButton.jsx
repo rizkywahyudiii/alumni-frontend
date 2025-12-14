@@ -11,7 +11,7 @@ export default function ExportButton() {
             const token = localStorage.getItem('token');
             
             // Request ke Backend dengan responseType 'blob' (PENTING!)
-            const response = await axios.get('http://localhost:8000/api/v1/alumni/tracer-study/export', {
+            const response = await axios.get('http://localhost:8000/api/v1/alumni/admin/tracer-study/export', {
                 headers: { 
                     Authorization: `Bearer ${token}`,
                 },
