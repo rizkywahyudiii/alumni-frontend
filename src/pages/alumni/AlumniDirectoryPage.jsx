@@ -52,9 +52,18 @@ const AlumniDirectoryPage = () => {
 
     // Helper Avatar
     const getAvatarUrl = (path) => {
+        // 1. Jika path kosong/null, kembalikan Default Avatar (Biar UI tetap rapi)
+        // Kamu bisa ganti "&name=Alumni" jadi nama user kalau variabelnya tersedia
         if (!path) return `https://ui-avatars.com/api/?background=random&name=Alumni`;
-        // Pastikan URL backend sesuai environment
-        return path.startsWith('http') ? path : `http://localhost:8000/storage/${path}`;
+        
+        // 2. Jika path sudah lengkap (misal dari Google Login ada https), pakai langsung
+        if (path.startsWith('http')) return path;
+
+        // 3. Ambil URL server dari Env Vercel (INI PENTING BUAT DEPLOY)
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+        // 4. Gabungkan: URL Server + /storage/ + nama file
+        return `${baseUrl}/storage/${path}`;
     };
 
     return (
