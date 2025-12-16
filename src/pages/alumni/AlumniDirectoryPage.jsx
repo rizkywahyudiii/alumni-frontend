@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { Search, Briefcase, Mail } from "lucide-react"; 
 import { Link } from 'react-router-dom';
 
@@ -14,7 +14,7 @@ const AlumniDirectoryPage = () => {
         try {
             console.log("Fetching with Token:", localStorage.getItem('token')); // Debug Token
 
-            const response = await axios.get(`http://localhost:8000/api/v1/alumni/directory?q=${query}`, {
+            const response = await api.get(`/v1/alumni/directory?q=${query}`, {
                 headers: { 
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                     Accept: 'application/json'

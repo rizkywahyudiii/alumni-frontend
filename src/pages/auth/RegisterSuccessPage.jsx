@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom'; // Tambah useLocation
-import axios from 'axios'; // Tambah Axios
+import api from '../../services/api'; // Tambah api
 import { MailCheck, ArrowRight, RefreshCw, CheckCircle } from 'lucide-react';
 
 export default function RegisterSuccessPage() {
@@ -47,7 +47,7 @@ export default function RegisterSuccessPage() {
         try {
             // 👇 PERBAIKAN: Tembak Route Public Baru
             // Kita kirim { email } di body
-            await axios.post('http://localhost:8000/api/resend-verification', 
+            await api.post('/resend-verification', 
                 { email: email }, 
                 {
                     // Kita tetap pasang ini jaga-jaga kalau config CORS butuh

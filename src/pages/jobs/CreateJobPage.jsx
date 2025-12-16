@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 
 const CreateJobPage = () => {
@@ -30,7 +30,7 @@ const CreateJobPage = () => {
         setError(null);
 
         try {
-            await axios.post('http://localhost:8000/api/v1/alumni/jobs', formData, {
+            await api.post('/v1/alumni/jobs', formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     Accept: 'application/json'

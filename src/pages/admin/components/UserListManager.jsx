@@ -1,6 +1,6 @@
 // src/pages/admin/components/UserListManager.jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../../services/api';
 import { Search, Trash2, Edit, Save, X } from 'lucide-react';
 
 export default function UserListManager() {
@@ -21,7 +21,7 @@ export default function UserListManager() {
     const fetchUsers = async (pageNo = 1, searchQuery = '') => {
         setLoading(true);
         try {
-            const res = await axios.get(`http://localhost:8000/api/v1/alumni/admin/users?page=${pageNo}&search=${searchQuery}`, {
+            const res = await api.get(`/v1/alumni/admin/users?page=${pageNo}&search=${searchQuery}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUsers(res.data.data.data);
@@ -47,7 +47,7 @@ export default function UserListManager() {
         if (!window.confirm("Yakin ingin menghapus user ini? Data tidak bisa dikembalikan!")) return;
 
         try {
-            await axios.delete(`http://localhost:8000/api/v1/alumni/admin/users/${id}`, {
+            await api.delete(`/v1/alumni/admin/users/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchUsers(page, search); // Refresh table
@@ -70,7 +70,7 @@ export default function UserListManager() {
     // 4. Handle Save (Update)
     const handleSave = async (id) => {
         try {
-            await axios.put(`http://localhost:8000/api/v1/alumni/admin/users/${id}`, editForm, {
+            await api.put(`/v1/alumni/admin/users/${id}`, editForm, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setEditingId(null);

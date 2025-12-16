@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, Loader2, Calendar, CreditCard, Mail, Lock, User } from 'lucide-react';
 
@@ -28,43 +28,37 @@ export default function RegisterPage() {
 
     // Handle Submit
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setErrors({});
+    e.preventDefault();
+    setLoading(true);
+    setErrors({});
 
-        try {
-            // Setup Axios Instance
-            const api = axios.create({
-                baseURL: 'http://localhost:8000',
-                withCredentials: true, // Wajib ON
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
-            });
+    try {
+        // ❌ HAPUS BAGIAN api.create MANUAL INI
+        // ❌ HAPUS BAGIAN api.get('/sanctum/csrf-cookie') (Biasanya tidak perlu jika pakai Token Based)
 
-            // 1. Ambil CSRF Cookie dulu
-            await api.get('/sanctum/csrf-cookie');
+        // ✅ CUKUP PANGGIL SATU BARIS INI:
+        // Perhatikan: Kita pakai '/register' saja, bukan '/api/register'
+        // Karena di api.js sudah kita set baseURL-nya berakhiran '/api'
+        await api.post('/register', formData);
+        
+        // Sukses
+        navigate('/register-success', { state: { email: formData.email } });
 
-            // 2. Tembak API Register (Perhatikan URL-nya ada /api)
-            await api.post('/api/register', formData);
-            
-            // Sukses
-            navigate('/register-success', { state: { email: formData.email } });
-
-        } catch (error) {
-            console.error("Debug Error:", error);
-            if (error.response?.data?.errors) {
-                setErrors(error.response.data.errors);
-            } else if (error.response?.data?.message) {
-                 setErrors({ general: error.response.data.message });
-            } else {
-                setErrors({ general: "Gagal terhubung ke server." });
-            }
-        } finally {
-            setLoading(false);
+    } catch (error) {
+        console.error("Debug Error:", error);
+        
+        // Logic Error Handling (Tetap Pertahankan, ini sudah bagus)
+        if (error.response?.data?.errors) {
+            setErrors(error.response.data.errors);
+        } else if (error.response?.data?.message) {
+             setErrors({ general: error.response.data.message });
+        } else {
+            setErrors({ general: "Gagal terhubung ke server." });
         }
-    };
+    } finally {
+        setLoading(false);
+    }
+};
 
     return (
         <div className="flex flex-col justify-center min-h-screen py-12 font-sans bg-gray-50 sm:px-6 lg:px-8 animate-fade-in">

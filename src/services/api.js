@@ -5,7 +5,7 @@
 
 // const api = axios.create({
 //   // PENTING: baseURL harus mengarah ke /api
-//   baseURL: 'http://localhost:8000/api', 
+//   baseURL: '', 
 //   headers: {
 //     'Content-Type': 'application/json',
 //     // PENTING: Header ini memaksa Laravel merespon dengan JSON, bukan Redirect HTML
@@ -41,7 +41,7 @@ import axios from 'axios';
 const domain = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 // 2. Gabungkan dengan '/api'
-// Hasilnya jadi: "https://backend-kamu.railway.app/api" atau "http://localhost:8000/api"
+// Hasilnya jadi: "https://backend-kamu.railway.app/api" atau ""
 const baseURL = `${domain}/api`;
 
 const api = axios.create({

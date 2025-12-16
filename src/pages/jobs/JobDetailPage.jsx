@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 
 const JobDetailPage = () => {
@@ -14,7 +14,7 @@ const JobDetailPage = () => {
     useEffect(() => {
         const fetchJobDetail = async () => {
             try {
-                const response = await axios.get(`http://localhost:8000/api/v1/alumni/jobs/${id}`, {
+                const response = await api.get(`/v1/alumni/jobs/${id}`, {
                     headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
                 });
                 setJob(response.data.data);
@@ -55,7 +55,7 @@ const JobDetailPage = () => {
         if (!window.confirm("Yakin ingin menghapus lowongan ini?")) return;
 
         try {
-            await axios.delete(`http://localhost:8000/api/v1/alumni/jobs/${id}`, {
+            await api.delete(`/v1/alumni/jobs/${id}`, {
                 headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
             });
             alert("Lowongan berhasil dihapus");

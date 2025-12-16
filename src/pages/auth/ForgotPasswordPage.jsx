@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft, Loader2, CheckCircle } from 'lucide-react';
 
@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
 
         try {
             // Panggil API Laravel
-            await axios.post('http://localhost:8000/api/forgot-password', { email });
+            await api.post('/forgot-password', { email });
             setMessage("Link reset password telah dikirim ke email Anda. Silakan cek Inbox/Spam.");
         } catch (err) {
             setError(err.response?.data?.message || "Terjadi kesalahan. Pastikan email terdaftar.");

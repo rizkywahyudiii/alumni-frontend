@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import axios from 'axios'; // Gunakan axios global
+import api from '../services/api'; // Gunakan api global
 import { Camera, Save, User, Lock, Shield, IdCard } from "lucide-react";
 
 export default function ProfilePage() {
@@ -21,7 +21,7 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8000/api/v1/alumni/profile', {
+      const response = await api.get('/v1/alumni/profile', {
         headers: { 
           Authorization: `Bearer ${token}`,
           Accept: 'application/json'
@@ -78,7 +78,7 @@ export default function ProfilePage() {
     setIsUploading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('http://localhost:8000/api/v1/alumni/profile', uploadData, {
+      const res = await api.post('/v1/alumni/profile', uploadData, {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
@@ -116,7 +116,7 @@ export default function ProfilePage() {
       }
 
       const token = localStorage.getItem('token');
-      const res = await axios.put('http://localhost:8000/api/v1/alumni/profile', payload, {
+      const res = await api.put('/v1/alumni/profile', payload, {
         headers: { 
           Authorization: `Bearer ${token}`,
           Accept: 'application/json',

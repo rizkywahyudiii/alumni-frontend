@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // Pastikan axios sudah terinstall
+import api from '../../services/api'; // Pastikan api sudah terinstall
 import Toast from '../../components/common/Toast';
 
 const TracerStudy = () => {
@@ -20,8 +20,8 @@ const TracerStudy = () => {
     // Ambil token dari localStorage (sesuaikan dengan cara kamu simpan token)
     const token = localStorage.getItem('token'); 
 
-    // Config Axios Header
-    const axiosConfig = {
+    // Config api Header
+    const apiConfig = {
         headers: { 
             Authorization: `Bearer ${token}`,
             'Accept': 'application/json',
@@ -34,7 +34,7 @@ const TracerStudy = () => {
         const fetchData = async () => {
             try {
                 // Sesuaikan URL dengan route di api.php
-                const response = await axios.get('http://localhost:8000/api/v1/alumni/tracer-study/me', axiosConfig);
+                const response = await api.get('/v1/alumni/tracer-study/me', apiConfig);
                 if (response.data.data) {
                     setFormData(response.data.data);
                 }
@@ -60,7 +60,7 @@ const TracerStudy = () => {
         // Hapus setMessage(null) yang lama
 
         try {
-            await axios.post('http://localhost:8000/api/v1/alumni/tracer-study', formData, axiosConfig);
+            await api.post('/v1/alumni/tracer-study', formData, apiConfig);
             
             // 3. TAMPILKAN TOAST SUKSES
             setToast({ 

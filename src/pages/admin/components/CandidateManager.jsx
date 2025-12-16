@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../../services/api';
 import { Upload, Download, Search, AlertCircle, FileSpreadsheet, Trash2, RefreshCw } from 'lucide-react';
 
 export default function CandidateManager() {
@@ -16,7 +16,7 @@ export default function CandidateManager() {
     const fetchCandidates = async (pageNo = 1, query = '') => {
         setLoading(true);
         try {
-            const res = await axios.get(`http://localhost:8000/api/v1/alumni/admin/candidates?page=${pageNo}&q=${query}`, { 
+            const res = await api.get(`/v1/alumni/admin/candidates?page=${pageNo}&q=${query}`, { 
                 headers: { Authorization: `Bearer ${token}` } 
             });
             setCandidates(res.data.data.data || []);
@@ -38,7 +38,7 @@ export default function CandidateManager() {
     // --- 2. DOWNLOAD TEMPLATE ---
     const handleDownloadTemplate = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/api/v1/alumni/admin/candidates/template', {
+            const response = await api.get('/v1/alumni/admin/candidates/template', {
                 headers: { Authorization: `Bearer ${token}` },
                 responseType: 'blob', // Wajib blob untuk file binary
             });
@@ -71,7 +71,7 @@ export default function CandidateManager() {
 
         setImporting(true);
         try {
-            const res = await axios.post('http://localhost:8000/api/v1/alumni/admin/candidates/import', formData, {
+            const res = await api.post('/v1/alumni/admin/candidates/import', formData, {
                 headers: { 
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data' 

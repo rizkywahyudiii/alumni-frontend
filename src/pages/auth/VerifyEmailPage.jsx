@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/api';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
 export default function VerifyEmailPage() {
@@ -15,10 +15,10 @@ export default function VerifyEmailPage() {
         const verify = async () => {
             try {
                 // Rakit URL Backend lengkap dengan query string signature
-                const backendUrl = `http://localhost:8000/api/email/verify/${id}/${hash}?${searchParams.toString()}`;
+                const backendUrl = `/email/verify/${id}/${hash}?${searchParams.toString()}`;
 
                 // Tembak API
-                await axios.get(backendUrl);
+                await api.get(backendUrl);
 
                 setStatus('success');
                 setMessage('Email berhasil diverifikasi! Anda akan diarahkan dalam 3 detik...');

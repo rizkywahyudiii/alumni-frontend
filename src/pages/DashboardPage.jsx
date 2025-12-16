@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 import ExportButton from '../components/common/ExportButton';
 // Import komponen Chart dari Recharts
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
@@ -30,7 +30,7 @@ export default function DashboardPage() {
                 // Kita hindari request yang tidak perlu jika user bukan alumni
                 if (isAlumni) {
                     try {
-                        const tracerRes = await axios.get('http://localhost:8000/api/v1/alumni/tracer-study/me', {
+                        const tracerRes = await api.get('/v1/alumni/tracer-study/me', {
                             headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
                         });
                         // Jika ada data (tidak null), berarti sudah isi
@@ -42,7 +42,7 @@ export default function DashboardPage() {
                 }
 
                 // 2. Ambil Statistik Dashboard (Shared Data)
-                const dashboardRes = await axios.get('http://localhost:8000/api/v1/alumni/dashboard/stats', {
+                const dashboardRes = await api.get('/v1/alumni/dashboard/stats', {
                     headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
                 });
                 setStats(dashboardRes.data.data);

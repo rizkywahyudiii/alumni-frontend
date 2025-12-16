@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { FileDown, Loader2 } from 'lucide-react'; // Pastikan install lucide-react
 
 export default function ExportButton() {
@@ -11,7 +11,7 @@ export default function ExportButton() {
             const token = localStorage.getItem('token');
             
             // Request ke Backend dengan responseType 'blob' (PENTING!)
-            const response = await axios.get('http://localhost:8000/api/v1/alumni/admin/tracer-study/export', {
+            const response = await api.get('/v1/alumni/admin/tracer-study/export', {
                 headers: { 
                     Authorization: `Bearer ${token}`,
                 },

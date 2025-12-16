@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../../services/api';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import ConfirmModal from '../common/ConfirmModal';
@@ -51,7 +51,7 @@ export default function Navbar({ toggleSidebar }) {
       try {
           const token = localStorage.getItem('token');
           if (token) {
-              await axios.post('http://localhost:8000/api/logout', {}, {
+              await api.post('/logout', {}, {
                   headers: { Authorization: `Bearer ${token}` }
               });
           }

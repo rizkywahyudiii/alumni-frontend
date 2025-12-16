@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { Upload, Download, Search, FileSpreadsheet, AlertCircle } from 'lucide-react';
 
 export default function CandidateManager() {
@@ -16,7 +16,7 @@ export default function CandidateManager() {
     const fetchCandidates = async () => {
         setLoading(true);
         try {
-            const res = await axios.get(`http://localhost:8000/api/v1/alumni/admin/candidates?q=${search}`, { headers });
+            const res = await api.get(`/v1/alumni/admin/candidates?q=${search}`, { headers });
             setCandidates(res.data.data.data);
         } catch (error) {
             console.error(error);
@@ -32,7 +32,7 @@ export default function CandidateManager() {
     // Handle Download Template
     const handleDownloadTemplate = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/api/v1/alumni/admin/candidates/template', {
+            const response = await api.get('/v1/alumni/admin/candidates/template', {
                 headers,
                 responseType: 'blob', // Penting untuk download file
             });
@@ -58,7 +58,7 @@ export default function CandidateManager() {
 
         setImporting(true);
         try {
-            await axios.post('http://localhost:8000/api/v1/alumni/admin/candidates/import', formData, {
+            await api.post('/v1/alumni/admin/candidates/import', formData, {
                 headers: { ...headers, 'Content-Type': 'multipart/form-data' }
             });
             alert('Import Berhasil!');

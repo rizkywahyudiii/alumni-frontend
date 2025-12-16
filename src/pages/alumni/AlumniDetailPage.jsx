@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { useParams, Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Linkedin, Briefcase, GraduationCap, ArrowLeft, Building } from "lucide-react";
 
@@ -14,7 +14,7 @@ const AlumniDetailPage = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const response = await axios.get(`http://localhost:8000/api/v1/alumni/directory/${id}`, {
+                const response = await api.get(`/v1/alumni/directory/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setAlumni(response.data.data);

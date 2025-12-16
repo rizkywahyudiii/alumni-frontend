@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { Link } from 'react-router-dom';
 
 const JobsPage = () => {
@@ -20,8 +20,8 @@ const JobsPage = () => {
     // Mahasiswa & Dosen TIDAK ADA di list ini, jadi tombol akan hilang buat mereka
     const canCreateJob = ['alumni', 'admin', 'super_admin'].includes(currentUser.role);
     
-    // Config Axios
-    const axiosConfig = {
+    // Config api
+    const apiConfig = {
         headers: { 
             Authorization: `Bearer ${token}`,
             Accept: 'application/json'
@@ -32,7 +32,7 @@ const JobsPage = () => {
     useEffect(() => {
         const fetchJobs = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/api/v1/alumni/jobs', axiosConfig);
+                const response = await api.get('/v1/alumni/jobs', apiConfig);
                 setJobs(response.data.data);
             } catch (error) {
                 console.error("Error:", error);
