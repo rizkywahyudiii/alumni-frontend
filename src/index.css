@@ -52,3 +52,13 @@
 .animate-bar-delayed {
   animation: barPulse2 2.4s ease-in-out infinite;
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .shimmer, .animate-bar, .animate-bar-delayed { animation: none; }
+  .animate-bar, .animate-bar-delayed { height: 60%; }
+}
