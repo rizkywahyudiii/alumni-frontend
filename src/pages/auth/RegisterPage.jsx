@@ -39,10 +39,14 @@ export default function RegisterPage() {
         // ✅ CUKUP PANGGIL SATU BARIS INI:
         // Perhatikan: Kita pakai '/register' saja, bukan '/api/register'
         // Karena di api.js sudah kita set baseURL-nya berakhiran '/api'
-        await api.post('/register', formData);
-        
-        // Sukses
-        navigate('/register-success', { state: { email: formData.email } });
+        const { data } = await api.post('/register', formData);
+
+        // Sukses: bypass verifikasi aktif -> langsung ke login
+        if (data.email_verified) {
+            navigate('/login', { state: { registered: true } });
+        } else {
+            navigate('/register-success', { state: { email: formData.email } });
+        }
 
     } catch (error) {
         console.error("Debug Error:", error);

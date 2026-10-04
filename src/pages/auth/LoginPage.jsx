@@ -23,6 +23,13 @@ export default function LoginPage() {
             type: 'error'
         });
         window.history.replaceState({}, document.title);
+    } else if (location.state?.registered) {
+        setToast({
+            show: true,
+            message: 'Registrasi berhasil! Silakan login.',
+            type: 'success'
+        });
+        window.history.replaceState({}, document.title);
     }
   }, [location]);
 
