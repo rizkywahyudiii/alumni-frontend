@@ -122,7 +122,19 @@ const AlumniDirectoryPage = () => {
                                     </div>
 
                                     {/* Data Pekerjaan (Tracer Study) */}
-                                    {alumni.tracer_study ? (
+                                    {alumni.employments?.[0] && !alumni.employments[0].is_public ? (
+                                        <div className="flex items-center gap-1.5 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded w-fit mt-2">
+                                            <Briefcase size={12} className="shrink-0" />
+                                            <span className="truncate max-w-[150px]">Posisi pekerjaan disembunyikan</span>
+                                        </div>
+                                    ) : alumni.employments?.[0] ? (
+                                        <div className="flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded w-fit mt-2">
+                                            <Briefcase size={12} className="shrink-0" />
+                                            <span className="truncate max-w-[150px]">
+                                                {alumni.employments[0].title} di {alumni.employments[0].company_name}
+                                            </span>
+                                        </div>
+                                    ) : alumni.tracer_study ? (
                                         <div className="flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded w-fit mt-2">
                                             <Briefcase size={12} className="shrink-0" />
                                             <span className="truncate max-w-[150px]">

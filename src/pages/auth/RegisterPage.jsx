@@ -17,6 +17,26 @@ export default function RegisterPage() {
 
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    const [verified, setVerified] = useState(false); // NIM + tgl lahir cocok dengan data alumni
+
+    // Tombol "Cek Data": validasi NIM + tanggal lahir, auto-fill nama
+    const handleCheck = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setErrors({});
+        try {
+            const { data } = await api.post('/register/check', {
+                nim: formData.nim,
+                date_of_birth: formData.date_of_birth,
+            });
+            setFormData(prev => ({ ...prev, name: data.name }));
+            setVerified(true);
+        } catch (error) {
+            setErrors({ general: error.response?.data?.message || "Gagal terhubung ke server." });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Handle Input Change
     const handleChange = (e) => {
@@ -88,7 +108,7 @@ export default function RegisterPage() {
                         </div>
                     )}
 
-                    <form className="space-y-5" onSubmit={handleSubmit}>
+                    <form className="space-y-5" onSubmit={verified ? handleSubmit : handleCheck}>
                         
                         {/* 1. NIM (Kunci Utama) */}
                         <div>
@@ -101,6 +121,7 @@ export default function RegisterPage() {
                                     type="text"
                                     name="nim"
                                     required
+                                    readOnly={verified}
                                     value={formData.nim}
                                     onChange={handleChange}
                                     className="block w-full py-2 pl-10 pr-3 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm"
@@ -121,6 +142,7 @@ export default function RegisterPage() {
                                     type="date"
                                     name="date_of_birth"
                                     required
+                                    readOnly={verified}
                                     value={formData.date_of_birth}
                                     onChange={handleChange}
                                     className="block w-full py-2 pl-10 pr-3 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm"
@@ -129,6 +151,31 @@ export default function RegisterPage() {
                             <p className="mt-1 text-xs text-gray-500">Digunakan untuk mencocokkan data Anda.</p>
                             {errors.date_of_birth && <p className="mt-1 text-xs text-red-600">{errors.date_of_birth[0]}</p>}
                         </div>
+
+                        {!verified ? (
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all"
+                            >
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        Mengecek Data...
+                                    </>
+                                ) : (
+                                    'Cek Data'
+                                )}
+                            </button>
+                        ) : (
+                        <>
+                        <button
+                            type="button"
+                            onClick={() => { setVerified(false); setFormData(prev => ({ ...prev, name: '' })); }}
+                            className="text-xs font-medium text-emerald-600 hover:underline"
+                        >
+                            Ubah NIM / Tanggal Lahir
+                        </button>
 
                         {/* Divider */}
                         <div className="relative my-4">
@@ -151,9 +198,10 @@ export default function RegisterPage() {
                                     type="text"
                                     name="name"
                                     required
+                                    readOnly
                                     value={formData.name}
                                     onChange={handleChange}
-                                    className="block w-full py-2 pl-10 pr-3 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm"
+                                    className="block w-full py-2 pl-10 pr-3 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-gray-100 text-gray-700"
                                     placeholder="Nama sesuai ijazah"
                                 />
                             </div>
@@ -236,6 +284,8 @@ export default function RegisterPage() {
                                 )}
                             </button>
                         </div>
+                        </>
+                        )}
                     </form>
 
                     <div className="mt-6">
