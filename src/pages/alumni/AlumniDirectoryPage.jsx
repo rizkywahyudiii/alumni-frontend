@@ -7,19 +7,16 @@ const AlumniDirectoryPage = () => {
     const [alumniList, setAlumniList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    
-    // Fungsi Fetch Data
+    const [activeQuery, setActiveQuery] = useState(''); // query yang benar-benar dikirim
+    const [error, setError] = useState(null);
+
+    // Fungsi Fetch Data (token & Accept sudah diset interceptor di services/api)
     const fetchAlumni = async (query = '') => {
         setLoading(true);
+        setError(null);
+        setActiveQuery(query.trim());
         try {
-            console.log("Fetching with Token:", localStorage.getItem('token')); // Debug Token
-
-            const response = await api.get(`/v1/alumni/directory?q=${query}`, {
-                headers: { 
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                    Accept: 'application/json'
-                }
-            });
+            const response = await api.get('/v1/alumni/directory', { params: { q: query.trim() } });
             
             // ... (logic data sama)
             let incomingData = [];
@@ -32,8 +29,10 @@ const AlumniDirectoryPage = () => {
             }
             setAlumniList(incomingData);
 
-        } catch (error) {
-            console.error("Error fetching:", error);
+        } catch (err) {
+            console.error("Error fetching:", err);
+            setAlumniList([]);
+            setError(err.response?.data?.message || 'Gagal memuat direktori alumni. Coba lagi nanti.');
         } finally {
             setLoading(false);
         }
@@ -92,6 +91,13 @@ const AlumniDirectoryPage = () => {
                 <div className="py-20 text-center">
                     <div className="w-10 h-10 mx-auto mb-4 border-4 border-blue-200 rounded-full animate-spin border-t-blue-600"></div>
                     <p className="text-gray-500">Memuat data...</p>
+                </div>
+            ) : error ? (
+                <div className="py-10 text-center text-red-600 border border-red-200 border-dashed rounded-lg bg-red-50">
+                    {error}
+                    <button onClick={() => fetchAlumni(activeQuery)} className="block mx-auto mt-3 text-sm font-semibold underline">
+                        Coba lagi
+                    </button>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -160,7 +166,9 @@ const AlumniDirectoryPage = () => {
                         ))
                     ) : (
                         <div className="py-10 text-center text-gray-500 border border-dashed rounded-lg col-span-full bg-gray-50">
-                            Tidak ditemukan alumni dengan nama tersebut.
+                            {activeQuery
+                                ? `Tidak ditemukan alumni dengan kata kunci "${activeQuery}".`
+                                : 'Belum ada alumni yang tampil di direktori.'}
                         </div>
                     )}
                 </div>
